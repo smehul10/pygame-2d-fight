@@ -65,6 +65,10 @@ class Fighter(Sprite):
         self.sprites = sprites or {}
         self.load_sprites()
 
+        # --- Double Jump Support ---
+        self.max_jumps = 2
+        self.jumps_left = self.max_jumps
+
     def load_sprites(self):
         for key, sprite in self.sprites.items():
             sprite['image'] = pygame.image.load(sprite['imageSrc']).convert_alpha()
@@ -79,6 +83,7 @@ class Fighter(Sprite):
         if self.position.y + self.sprite_height >= screen_height - 40:
             self.velocity.y = 0
             self.position.y = screen_height - 40 - self.sprite_height
+            self.jumps_left = self.max_jumps  # Reset jump count on ground
         else:
             self.velocity.y += gravity
 
@@ -97,7 +102,6 @@ class Fighter(Sprite):
             self.switch_sprite('takeHit')
 
     def switch_sprite(self, sprite_name):
-        # If already playing death animation and it’s not finished, do nothing
         if self.image == self.sprites.get('death', {}).get('image'):
             if self.frames_current < self.sprites['death']['framesMax'] - 1:
                 return
@@ -105,17 +109,14 @@ class Fighter(Sprite):
                 self.dead = True
                 return
 
-        # If playing attack animation and it's not finished, don't interrupt it
         if self.image == self.sprites.get('attack1', {}).get('image'):
             if self.frames_current < self.sprites['attack1']['framesMax'] - 1:
                 return
 
-        # Same for takeHit animation
         if self.image == self.sprites.get('takeHit', {}).get('image'):
             if self.frames_current < self.sprites['takeHit']['framesMax'] - 1:
                 return
 
-        # Don't switch if fighter is fully dead
         if self.dead:
             return
 

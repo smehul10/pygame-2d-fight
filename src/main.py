@@ -6,24 +6,20 @@ import os
 
 pygame.init()
 
-# --- Setup ---
 WIDTH, HEIGHT = 1024, 576
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2D Fighting Game")
 clock = pygame.time.Clock()
 font = pygame.font.SysFont("Arial", 36)
 
-gravity = 0.7
+gravity = 1.5
 start_time = pygame.time.get_ticks()
 game_over_flag = [False]
 
-# --- Background ---
 print(os.path.abspath('../assets/img/background.png'))
 background = Sprite((0, 0), '../assets/img/background.png')
-
 shop = Sprite((600, 128), '../assets/img/shop.png', scale=2.75, frames_max=6)
 
-# --- Fighters ---
 def create_fighters():
     p = Fighter(
         position=(0, 0),
@@ -66,12 +62,10 @@ def create_fighters():
 
 player, enemy = create_fighters()
 
-# --- Input State ---
 keys = {'a': False, 'd': False, 'w': False, 'left': False, 'right': False, 'up': False}
 player_last_key = ''
 enemy_last_key = ''
 
-# --- Game Loop ---
 running = True
 while running:
     clock.tick(60)
@@ -150,7 +144,6 @@ while running:
 
     update_timer(screen, font, start_time, player, enemy, game_over_flag)
 
-    # Health Bars
     pygame.draw.rect(screen, (255, 0, 0), (20, 20, 200, 20))
     pygame.draw.rect(screen, (0, 255, 0), (20, 20, 200 * (player.health / 100), 20))
     pygame.draw.rect(screen, (255, 0, 0), (WIDTH - 220, 20, 200, 20))
@@ -158,7 +151,6 @@ while running:
 
     pygame.display.flip()
 
-    # --- Events ---
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -171,10 +163,12 @@ while running:
                 elif event.key == pygame.K_d:
                     keys['d'] = True
                     player_last_key = 'd'
-                elif event.key == pygame.K_w:
+                elif event.key == pygame.K_w and player.jumps_left > 0:
                     player.velocity.y = -30
+                    player.jumps_left -= 1
                 elif event.key == pygame.K_SPACE:
                     player.attack()
+
             if not enemy.dead:
                 if event.key == pygame.K_LEFT:
                     keys['left'] = True
@@ -182,8 +176,9 @@ while running:
                 elif event.key == pygame.K_RIGHT:
                     keys['right'] = True
                     enemy_last_key = 'right'
-                elif event.key == pygame.K_UP:
+                elif event.key == pygame.K_UP and enemy.jumps_left > 0:
                     enemy.velocity.y = -30
+                    enemy.jumps_left -= 1
                 elif event.key == pygame.K_DOWN:
                     enemy.attack()
 
