@@ -31,13 +31,16 @@ def render_text(screen, text, font):
     rect = surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
     screen.blit(surface, rect)
 
-# Draws the countdown timer and triggers winner logic
-def update_timer(screen, font, start_time, player, enemy):
+
+def update_timer(screen, font, start_time, player, enemy, game_over_flag):
     elapsed = pygame.time.get_ticks() - start_time
     remaining = max(0, (60000 - elapsed) // 1000)
 
-    if remaining == 0:
+    if remaining == 0 and not game_over_flag[0]:
         determine_winner(player, enemy, font, screen)
+        game_over_flag[0] = True
 
     timer_surface = font.render(str(remaining), True, (255, 255, 255))
-    screen.blit(timer_surface, (20, 20))
+    rect = timer_surface.get_rect(center=(screen.get_width() // 2, 20))
+    screen.blit(timer_surface, rect)
+

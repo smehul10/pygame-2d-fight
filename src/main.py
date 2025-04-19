@@ -1,5 +1,3 @@
-# src/main.py
-
 import pygame
 import sys
 from classes import Fighter, Sprite
@@ -17,71 +15,59 @@ font = pygame.font.SysFont("Arial", 36)
 
 gravity = 0.7
 start_time = pygame.time.get_ticks()
+game_over_flag = [False]
 
 # --- Background ---
 print(os.path.abspath('../assets/img/background.png'))
-background = Sprite(
-    position=(0, 0),
-    image_path='../assets/img/background.png'
-)
+background = Sprite((0, 0), '../assets/img/background.png')
 
-shop = Sprite(
-    position=(600, 128),
-    image_path='../assets/img/shop.png',
-    scale=2.75,
-    frames_max=6
-)
+shop = Sprite((600, 128), '../assets/img/shop.png', scale=2.75, frames_max=6)
 
 # --- Fighters ---
-player = Fighter(
-    position=(0, 0),
-    velocity=(0, 0),
-    image_path='../assets/img/samuraiMack/Idle.png',
-    frames_max=8,
-    scale=2.5,
-    offset=(215, 157),
-    sprites={
-        'idle': {'imageSrc': '../assets/img/samuraiMack/Idle.png', 'framesMax': 8},
-        'run': {'imageSrc': '../assets/img/samuraiMack/Run.png', 'framesMax': 8},
-        'jump': {'imageSrc': '../assets/img/samuraiMack/Jump.png', 'framesMax': 2},
-        'fall': {'imageSrc': '../assets/img/samuraiMack/Fall.png', 'framesMax': 2},
-        'attack1': {'imageSrc': '../assets/img/samuraiMack/Attack1.png', 'framesMax': 6},
-        'takeHit': {'imageSrc': '../assets/img/samuraiMack/Take Hit - white silhouette.png', 'framesMax': 4},
-        'death': {'imageSrc': '../assets/img/samuraiMack/Death.png', 'framesMax': 6}
-    },
-    attack_box={'offset': (100, 50), 'width': 160, 'height': 50}
-)
+def create_fighters():
+    p = Fighter(
+        position=(0, 0),
+        velocity=(0, 0),
+        image_path='../assets/img/samuraiMack/Idle.png',
+        frames_max=8,
+        scale=2.5,
+        offset=(215, 157),
+        sprites={
+            'idle': {'imageSrc': '../assets/img/samuraiMack/Idle.png', 'framesMax': 8},
+            'run': {'imageSrc': '../assets/img/samuraiMack/Run.png', 'framesMax': 8},
+            'jump': {'imageSrc': '../assets/img/samuraiMack/Jump.png', 'framesMax': 2},
+            'fall': {'imageSrc': '../assets/img/samuraiMack/Fall.png', 'framesMax': 2},
+            'attack1': {'imageSrc': '../assets/img/samuraiMack/Attack1.png', 'framesMax': 6},
+            'takeHit': {'imageSrc': '../assets/img/samuraiMack/Take Hit - white silhouette.png', 'framesMax': 4},
+            'death': {'imageSrc': '../assets/img/samuraiMack/Death.png', 'framesMax': 6}
+        },
+        attack_box={'offset': (100, 50), 'width': 160, 'height': 50}
+    )
+    e = Fighter(
+        position=(400, 100),
+        velocity=(0, 0),
+        color='blue',
+        image_path='../assets/img/kenji/Idle.png',
+        frames_max=4,
+        scale=2.5,
+        offset=(215, 167),
+        sprites={
+            'idle': {'imageSrc': '../assets/img/kenji/Idle.png', 'framesMax': 4},
+            'run': {'imageSrc': '../assets/img/kenji/Run.png', 'framesMax': 8},
+            'jump': {'imageSrc': '../assets/img/kenji/Jump.png', 'framesMax': 2},
+            'fall': {'imageSrc': '../assets/img/kenji/Fall.png', 'framesMax': 2},
+            'attack1': {'imageSrc': '../assets/img/kenji/Attack1.png', 'framesMax': 4},
+            'takeHit': {'imageSrc': '../assets/img/kenji/Take hit.png', 'framesMax': 3},
+            'death': {'imageSrc': '../assets/img/kenji/Death.png', 'framesMax': 7}
+        },
+        attack_box={'offset': (-170, 50), 'width': 170, 'height': 50}
+    )
+    return p, e
 
-enemy = Fighter(
-    position=(400, 100),
-    velocity=(0, 0),
-    color='blue',
-    image_path='../assets/img/kenji/Idle.png',
-    frames_max=4,
-    scale=2.5,
-    offset=(215, 167),
-    sprites={
-        'idle': {'imageSrc': '../assets/img/kenji/Idle.png', 'framesMax': 4},
-        'run': {'imageSrc': '../assets/img/kenji/Run.png', 'framesMax': 8},
-        'jump': {'imageSrc': '../assets/img/kenji/Jump.png', 'framesMax': 2},
-        'fall': {'imageSrc': '../assets/img/kenji/Fall.png', 'framesMax': 2},
-        'attack1': {'imageSrc': '../assets/img/kenji/Attack1.png', 'framesMax': 4},
-        'takeHit': {'imageSrc': '../assets/img/kenji/Take hit.png', 'framesMax': 3},
-        'death': {'imageSrc': '../assets/img/kenji/Death.png', 'framesMax': 7}
-    },
-    attack_box={'offset': (-170, 50), 'width': 170, 'height': 50}
-)
+player, enemy = create_fighters()
 
 # --- Input State ---
-keys = {
-    'a': False,
-    'd': False,
-    'w': False,
-    'left': False,
-    'right': False,
-    'up': False
-}
-
+keys = {'a': False, 'd': False, 'w': False, 'left': False, 'right': False, 'up': False}
 player_last_key = ''
 enemy_last_key = ''
 
@@ -91,22 +77,19 @@ while running:
     clock.tick(60)
     screen.fill((0, 0, 0))
 
-    # Background and Effects
     background.update(screen)
     shop.update(screen)
+
     overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    overlay.fill((255, 255, 255, 38))  # ~15% opacity white
+    overlay.fill((255, 255, 255, 38))
     screen.blit(overlay, (0, 0))
 
-    # Fighters
     player.update(screen, gravity, HEIGHT)
     enemy.update(screen, gravity, HEIGHT)
 
-    # Movement Reset
     player.velocity.x = 0
     enemy.velocity.x = 0
 
-    # Movement
     if not player.dead:
         if keys['a'] and player_last_key == 'a':
             player.velocity.x = -5
@@ -121,8 +104,7 @@ while running:
             player.switch_sprite('jump')
         elif player.velocity.y > 0:
             player.switch_sprite('fall')
-        
-    
+
     if not enemy.dead:
         if keys['left'] and enemy_last_key == 'left':
             enemy.velocity.x = -5
@@ -138,7 +120,6 @@ while running:
         elif enemy.velocity.y > 0:
             enemy.switch_sprite('fall')
 
-    # Collision and Attack
     if rectangular_collision(player, enemy) and player.is_attacking and player.frames_current == 4:
         enemy.take_hit()
         player.is_attacking = False
@@ -153,29 +134,27 @@ while running:
     if enemy.is_attacking and enemy.frames_current == 2:
         enemy.is_attacking = False
 
-    # Trigger death animation when health reaches 0
-
     if enemy.health <= 0 and not enemy.dead:
         enemy.switch_sprite('death')
     elif player.health <= 0 and not player.dead:
         player.switch_sprite('death')
 
-    # Health-based end
-    if enemy.health <= 0 or player.health <= 0:
+    if (enemy.health <= 0 or player.health <= 0) and not game_over_flag[0]:
         determine_winner(player, enemy, font, screen)
+        game_over_flag[0] = True
 
-    # Timer
-    update_timer(screen, font, start_time, player, enemy)
+    if game_over_flag[0]:
+        restart_text = font.render("Press R to Restart", True, (255, 255, 0))
+        restart_rect = restart_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50))
+        screen.blit(restart_text, restart_rect)
+
+    update_timer(screen, font, start_time, player, enemy, game_over_flag)
 
     # Health Bars
-
-    # Player (top-left)
-    pygame.draw.rect(screen, (255, 0, 0), (20, 20, 200, 20))  # full bar
-    pygame.draw.rect(screen, (0, 255, 0), (20, 20, 200 * (player.health / 100), 20))  # current health
-
-    # Enemy (top-right)
-    pygame.draw.rect(screen, (255, 0, 0), (WIDTH - 220, 20, 200, 20))  # full bar
-    pygame.draw.rect(screen, (0, 255, 0), (WIDTH - 220, 20, 200 * (enemy.health / 100), 20))  # current health
+    pygame.draw.rect(screen, (255, 0, 0), (20, 20, 200, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (20, 20, 200 * (player.health / 100), 20))
+    pygame.draw.rect(screen, (255, 0, 0), (WIDTH - 220, 20, 200, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (WIDTH - 220, 20, 200 * (enemy.health / 100), 20))
 
     pygame.display.flip()
 
@@ -207,6 +186,11 @@ while running:
                     enemy.velocity.y = -30
                 elif event.key == pygame.K_DOWN:
                     enemy.attack()
+
+            if event.key == pygame.K_r and game_over_flag[0]:
+                player, enemy = create_fighters()
+                start_time = pygame.time.get_ticks()
+                game_over_flag[0] = False
 
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_a:
