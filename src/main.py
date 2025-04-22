@@ -174,8 +174,8 @@ while running:
     overlay.fill((255, 255, 255, 38))
     screen.blit(overlay, (0, 0))
 
-    player.update(screen, gravity, HEIGHT)
-    enemy.update(screen, gravity, HEIGHT)
+    player.update(screen, gravity, HEIGHT, WIDTH)
+    enemy.update(screen, gravity, HEIGHT, WIDTH)
 
     player.velocity.x = 0
     enemy.velocity.x = 0

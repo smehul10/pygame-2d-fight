@@ -146,7 +146,7 @@ class Fighter(Sprite):
     #     self.draw(surface)
 
  
-    def update(self, surface, gravity, screen_height):
+    def update(self, surface, gravity, screen_height, screen_width):
         if not self.dead:
             self.animate_frames()
 
@@ -155,11 +155,13 @@ class Fighter(Sprite):
         self.attack_box_position = self.position + self.attack_box_offset
         self.position += self.velocity
 
+        # 🧱 X-axis barrier to keep fighters on screen
+        self.position.x = max(0, min(self.position.x, 950))
+
+
         # --- New Ground Collision Handling ---
         if self.transform_active:
-            # If powered-up (bigger), calculate scaled height
             scaled_height = self.sprite_height * self.scale
-
             if self.position.y + scaled_height >= screen_height - 40:
                 self.velocity.y = 0
                 self.position.y = screen_height - 40 - scaled_height
@@ -167,17 +169,19 @@ class Fighter(Sprite):
             else:
                 self.velocity.y += gravity
         else:
-            # If normal size
             if self.position.y + self.sprite_height >= screen_height - 40:
                 self.velocity.y = 0
                 self.position.y = screen_height - 40 - self.sprite_height
                 self.jumps_left = self.max_jumps
             else:
                 self.velocity.y += gravity
+
         # Revert transformation after timer expires
         if self.transform_active and pygame.time.get_ticks() >= self.transform_end_time:
             self.revert_to_base()
+
         self.draw(surface)
+
     
     # def draw(self, surface):
     #     # Choose current frame
