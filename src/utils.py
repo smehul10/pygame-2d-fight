@@ -16,9 +16,11 @@ def rectangular_collision(attacker, target):
 
 # Display winner text on the screen
 def determine_winner(player, enemy, font, screen):
-    if player.health == enemy.health:
+    #if player.health == enemy.health:
+    if player.health_comp.current_hp == enemy.health_comp.current_hp:
         text = "Tie"
-    elif player.health > enemy.health:
+    #elif player.health > enemy.health:
+    elif player.health_comp.current_hp > enemy.health_comp.current_hp:
         text = "Player 1 Wins"
     else:
         text = "Player 2 Wins"
